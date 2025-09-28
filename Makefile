@@ -1,5 +1,5 @@
 # User-configurable variables
-LIBNAME := foo
+LIBNAME := nu
 VERSION_MAJOR := 0
 VERSION_MINOR := 1
 VERSION_PATCH := 0
@@ -41,12 +41,18 @@ CFLAGS_RELEASE = $(CFLAGS_COMMON) $(CFLAGS_RELEASE_OPTS)
 
 CFLAGS_TEST = $(filter-out -Wmissing-prototypes,$(CFLAGS_COMMON)) $(CFLAGS_DEBUG) $(TEST_CFLAGS)
 
+# Example compilation flags (without dependency generation)
+CFLAGS_EXAMPLES = $(filter-out -MMD -MP,$(CFLAGS_BASE)) $(DISTRO_CFLAGS)
+
+# Test-specific flags for malloc testing and other test configurations
+TEST_FLAGS = -DQUICKSORT_STACK_SIZE=8 -DMALLOC=test_malloc
+
 CFLAGS = $(CFLAGS_BASE) $(DISTRO_CFLAGS)
 
 LDFLAGS = $(DISTRO_LDFLAGS)
 
-# Library source files (only foo.c)
-LIB_SOURCES := $(SRCDIR)/foo.c
+# Library source files
+LIB_SOURCES := $(SRCDIR)/nulib.c $(SRCDIR)/sort.c
 LIB_OBJECTS := $(LIB_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 LIB_DEPS := $(LIB_OBJECTS:.o=.d)
 
@@ -78,18 +84,18 @@ $(LIBDIR):
 # Generate version.h from Makefile variables
 $(SRCDIR)/version.h: Makefile
 	@echo "Generating version.h..."
-	@echo "#ifndef FOO_VERSION_H" > $@
-	@echo "#define FOO_VERSION_H" >> $@
+	@echo "#ifndef NULIB_VERSION_H" > $@
+	@echo "#define NULIB_VERSION_H" >> $@
 	@echo "" >> $@
-	@echo "#define FOO_VERSION_MAJOR $(VERSION_MAJOR)" >> $@
-	@echo "#define FOO_VERSION_MINOR $(VERSION_MINOR)" >> $@
-	@echo "#define FOO_VERSION_PATCH $(VERSION_PATCH)" >> $@
+	@echo "#define NULIB_VERSION_MAJOR $(VERSION_MAJOR)" >> $@
+	@echo "#define NULIB_VERSION_MINOR $(VERSION_MINOR)" >> $@
+	@echo "#define NULIB_VERSION_PATCH $(VERSION_PATCH)" >> $@
 	@echo "" >> $@
-	@echo "#define FOO_VERSION_STRING \"$(VERSION)\"" >> $@
+	@echo "#define NULIB_VERSION_STRING \"$(VERSION)\"" >> $@
 	@echo "" >> $@
-	@echo "#define FOO_MAKE_VERSION(major, minor, patch) ((major) * 10000 + (minor) * 100 + (patch))" >> $@
+	@echo "#define NULIB_MAKE_VERSION(major, minor, patch) ((major) * 10000 + (minor) * 100 + (patch))" >> $@
 	@echo "" >> $@
-	@echo "#define FOO_VERSION FOO_MAKE_VERSION(FOO_VERSION_MAJOR, FOO_VERSION_MINOR, FOO_VERSION_PATCH)" >> $@
+	@echo "#define NULIB_VERSION NULIB_MAKE_VERSION(NULIB_VERSION_MAJOR, NULIB_VERSION_MINOR, NULIB_VERSION_PATCH)" >> $@
 	@echo "" >> $@
 	@echo "#endif" >> $@
 
@@ -136,26 +142,36 @@ $(TMPDIR)/bench_utils.o: bench/bench_utils.c | $(TMPDIR)
 $(TMPDIR):
 	mkdir -p $(TMPDIR)
 
+# Example sources and binaries
+EXAMPLE_SRCS := $(wildcard examples/*.c)
+EXAMPLE_PROGS := $(patsubst examples/%.c,examples/%,$(EXAMPLE_SRCS))
+
+# Build all examples
+examples: $(STATIC_LIB) $(EXAMPLE_PROGS)
+	@echo "All examples built successfully"
+
+# Pattern rule for building example binaries
+examples/%: examples/%.c $(STATIC_LIB)
+	$(CC) $(CFLAGS_EXAMPLES) $< -I$(SRCDIR) $(STATIC_LIB) -o $@
+
 clean:
-	rm -rf $(OBJDIR) $(LIBDIR) $(REPORTSDIR) $(TMPDIR) tags $(SRCDIR)/version.h example/demo
+	rm -rf $(OBJDIR) $(LIBDIR) $(REPORTSDIR) $(TMPDIR) tags $(SRCDIR)/version.h $(EXAMPLE_PROGS)
 
 -include $(DEPS)
 
-.PHONY: all release clean check install uninstall tags fmt help deps check-deps coverage sanitize analyze check-all bench
+.PHONY: all release clean check install uninstall tags fmt help deps check-deps coverage sanitize analyze check-all bench examples
 
-check: require-glib
+check:
 	@mkdir -p $(TMPDIR)
 	@echo "Running tests..."
-	@for test in tests/*_test.c; do \
-		echo ""; \
-		testname=$$(basename $$test .c); \
-		libname=$${testname%_test}; \
-		if [ "$$libname" = "foo" ]; then \
-			echo "testing $$libname..."; \
-			$(CC) $(CFLAGS_TEST) -I./src $$test src/$$libname.c $(TEST_LDFLAGS) -MF $(TMPDIR)/$$testname.d -o $(TMPDIR)/$$testname; \
-			$(TMPDIR)/$$testname || exit 1; \
-		fi; \
-	done
+	@echo ""
+	@echo "Testing nulib module:"
+	$(CC) $(CFLAGS_BASE) -I. tests/nulib_test.c $(LIB_SOURCES) -o $(TMPDIR)/nulib_test
+	$(TMPDIR)/nulib_test
+	@echo ""
+	@echo "Testing sort module:"
+	$(CC) $(CFLAGS_BASE) $(TEST_FLAGS) -I. tests/sort_test.c tests/test_malloc.c $(LIB_SOURCES) -o $(TMPDIR)/sort_test
+	$(TMPDIR)/sort_test
 	@echo ""
 
 # Generate pkg-config file
@@ -190,10 +206,14 @@ tags:
 
 
 fmt:
+	@echo "Formatting with uncrustify:"
 	@find $(SRCDIR) tests \( -name "*.c" -o -name "*.h" \) -type f \
 		| while read file; do \
-			echo "Formatting: $$file"; \
-			clang-format -i "$$file"; \
+			if command -v uncrustify >/dev/null 2>&1; then \
+				uncrustify -c uncrustify.cfg --replace --no-backup "$$file"; \
+			else \
+				echo "uncrustify not available - install with: brew install uncrustify"; \
+			fi; \
 		done
 
 help:
@@ -205,11 +225,12 @@ help:
 	@echo "  uninstall  - Uninstall the library"
 	@echo "  check      - Run tests"
 	@echo "  bench      - Run benchmarks"
+	@echo "  examples   - Build all example programs"
 	@echo "  check-all  - Run comprehensive checks (check + analyze + sanitize + coverage)"
 	@echo "  analyze    - Run static analysis (clang or cppcheck)"
 	@echo "  sanitize   - Run tests with AddressSanitizer and UBSan"
 	@echo "  coverage   - Run tests with coverage analysis"
-	@echo "  fmt        - Format code with clang-format"
+	@echo "  fmt        - Format code with uncrustify"
 	@echo "  tags       - Generate ctags file"
 	@echo "  deps       - Show package installation instructions"
 	@echo "  check-deps - Check if build dependencies are available"
@@ -268,61 +289,81 @@ require-glib:
 		exit 1; \
 	}
 
-coverage: require-glib
+coverage:
 	@mkdir -p $(REPORTSDIR) $(TMPDIR)
 	@echo "Running tests with coverage..."
-	@for test in tests/*_test.c; do \
-		testname=$$(basename $$test .c); \
-		libname=$${testname%_test}; \
-		if [ "$$libname" = "foo" ]; then \
-			echo "Testing $$libname with coverage..."; \
-			$(CC) $(CFLAGS_TEST) -I./src $$test src/$$libname.c $(TEST_LDFLAGS) --coverage -MF $(TMPDIR)/$$testname.d -o $(TMPDIR)/$$testname; \
-			$(TMPDIR)/$$testname || exit 1; \
-		fi; \
-	done
+	@echo ""
+	@echo "  Testing nulib module with coverage..."
+	$(CC) $(CFLAGS_BASE) -I. tests/nulib_test.c $(LIB_SOURCES) --coverage -o $(TMPDIR)/nulib_test_cov
+	@if ! $(TMPDIR)/nulib_test_cov; then \
+		echo "  ERROR: nulib_test_cov failed to execute"; \
+		echo "  Check that the executable can run on your system"; \
+		exit 1; \
+	fi
+	@echo ""
+	@echo "  Testing sort module with coverage..."
+	$(CC) $(CFLAGS_BASE) $(TEST_FLAGS) -I. tests/sort_test.c tests/test_malloc.c $(LIB_SOURCES) --coverage -o $(TMPDIR)/sort_test_cov
+	@if ! $(TMPDIR)/sort_test_cov; then \
+		echo "  ERROR: sort_test_cov failed to execute"; \
+		echo "  Check that the executable can run on your system"; \
+		exit 1; \
+	fi
+	@echo ""
 	@echo "Generating coverage report..."
-	@for file in src/foo.c tests/foo_test.c; do \
-		if [ -f "$$file" ]; then \
-			base=$$(basename $$file .c); \
-			for testfile in $(TMPDIR)/*_test-$${base}.gcda $(TMPDIR)/$${base}.gcda; do \
-				if [ -f "$$testfile" ]; then \
-					cd $(TMPDIR) && gcov "$$(basename $$testfile)"; \
-				fi; \
-			done; \
-		fi; \
-	done
-	@mv $(TMPDIR)/*.gcov $(REPORTSDIR)/ 2>/dev/null || true
-	@echo "Coverage files: $(REPORTSDIR)/*.gcov"
+	@rm -f $(TMPDIR)/*.gcov *.gcov
+	@if ! ls $(TMPDIR)/*.gcda >/dev/null 2>&1; then \
+		echo "  ERROR: No coverage data files (.gcda) were generated"; \
+		echo "  This means the test executables did not run properly"; \
+		exit 1; \
+	fi
+	@echo ""
+	@echo "Coverage results:"
+	@result=$$(gcov -o $(TMPDIR) $(TMPDIR)/nulib_test_cov-nulib.gcda 2>/dev/null | grep "^Lines executed:" | head -1); \
+	percent=$$(echo "$$result" | sed -n 's/Lines executed:\([0-9.]*\)%.*/\1/p'); \
+	lines=$$(echo "$$result" | sed -n 's/.*of \([0-9]*\).*/\1/p'); \
+	printf "  %6s%% of %2s - nulib.c (from nulib_test)\n" "$$percent" "$$lines"
+	@if [ -f nulib.c.gcov ]; then \
+		mv nulib.c.gcov $(REPORTSDIR)/ 2>/dev/null || true; \
+	fi
+	@rm -f *.gcov
+	@result=$$(gcov -o $(TMPDIR) $(TMPDIR)/sort_test_cov-sort.gcda 2>/dev/null | grep "^Lines executed:" | tail -1); \
+	percent=$$(echo "$$result" | sed -n 's/Lines executed:\([0-9.]*\)%.*/\1/p'); \
+	lines=$$(echo "$$result" | sed -n 's/.*of \([0-9]*\).*/\1/p'); \
+	printf "  %6s%% of %2s - sort.c (from sort_test)\n" "$$percent" "$$lines"
+	@if [ -f sort.c.gcov ]; then \
+		mv sort.c.gcov $(REPORTSDIR)/ 2>/dev/null || true; \
+	fi
+	@rm -f *.gcov
 
 sanitize: CFLAGS = $(filter-out -D_FORTIFY_SOURCE=2,$(CFLAGS_COMMON) $(CFLAGS_DEBUG)) $(DISTRO_CFLAGS) -fsanitize=address,undefined
 sanitize: LDFLAGS = $(DISTRO_LDFLAGS) -fsanitize=address,undefined
-sanitize: require-glib clean
+sanitize: clean
 	@mkdir -p $(TMPDIR)
 	@echo "Running tests with sanitizers..."
-	@for test in tests/*_test.c; do \
-		testname=$$(basename $$test .c); \
-		libname=$${testname%_test}; \
-		if [ "$$libname" = "foo" ]; then \
-			echo "Testing $$libname with sanitizers..."; \
-			$(CC) $(filter-out -D_FORTIFY_SOURCE=2,$(CFLAGS_TEST)) -I./src $$test src/$$libname.c $(TEST_LDFLAGS) -fsanitize=address,undefined -MF $(TMPDIR)/$$testname.d -o $(TMPDIR)/$$testname; \
-			$(TMPDIR)/$$testname || exit 1; \
-		fi; \
-	done
+	@echo ""
+	@echo "  Testing nulib module with sanitizers..."
+	$(CC) $(filter-out -D_FORTIFY_SOURCE=2,$(CFLAGS_BASE)) -I. tests/nulib_test.c $(LIB_SOURCES) -fsanitize=address,undefined -o $(TMPDIR)/nulib_test_san
+	$(TMPDIR)/nulib_test_san
+	@echo ""
+	@echo "  Testing sort module with sanitizers..."
+	$(CC) $(filter-out -D_FORTIFY_SOURCE=2,$(CFLAGS_BASE)) $(TEST_FLAGS) -I. tests/sort_test.c tests/test_malloc.c $(LIB_SOURCES) -fsanitize=address,undefined -o $(TMPDIR)/sort_test_san
+	$(TMPDIR)/sort_test_san
+	@echo ""
+	@echo "All sanitizer tests passed!"
 
 analyze:
 	@echo "Running static analysis..."
 	@mkdir -p $(REPORTSDIR) $(TMPDIR)
 	@command -v clang >/dev/null 2>&1 && { \
 		echo "Using clang static analyzer..."; \
-		if clang --analyze $(filter-out -MMD -MP -fanalyzer,$(CFLAGS)) -I./src src/foo.c && \
-		   clang --analyze $(filter-out -MMD -MP -fanalyzer,$(CFLAGS_TEST)) -I./src tests/foo_test.c; then \
+		if clang --analyze $(filter-out -MMD -MP -fanalyzer,$(CFLAGS)) -I./src src/nulib.c src/sort.c; then \
 			echo "Static analysis completed - no issues found!"; \
 		fi; \
 		mv *.plist $(REPORTSDIR)/ 2>/dev/null || true; \
 	} || { \
 		echo "clang not found, trying cppcheck..."; \
 		command -v cppcheck >/dev/null 2>&1 && { \
-			cppcheck --enable=all --std=c17 --suppress=missingIncludeSystem --suppress=missingInclude src/foo.c --quiet && \
+			cppcheck --enable=all --std=c17 --suppress=missingIncludeSystem --suppress=missingInclude src/*.c --quiet && \
 			echo "Static analysis completed - no issues found!"; \
 		} || { \
 			echo "No static analysis tools found. Install clang or cppcheck."; \

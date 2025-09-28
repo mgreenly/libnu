@@ -1,38 +1,28 @@
-# libfoo
+# libnu
 
-Run `./rename foo yourlib` to set your library's name then delete the `rename` script.
+A collection of essential "C" utilities with zero abstraction overhead.
 
-After renaming, update these files for your project:
+I'm just getting started, someday there will be hundreds of modules in this collection!
 
-- `LICENSE` - replace with your license.
-- `pkgconfig/foo.pc.in` - Update the Description and URL fields
-- `Makefile` - Update VERSION_MAJOR/MINOR/PATCH (lines 3-5) - this generates version.h automatically
-- `mk/debian.mk` and `mk/darwin.mk` - Remove PNG/JPEG dependencies, add your own:
-  - Remove PNG_NAME, JPEG_NAME sections
-  - Add your library dependencies (follow the same pattern)
-  - Update LIB_DEPS_LIBS, LIB_DEPS_CFLAGS, LIB_DEPS_PC with your libs
-  - Update DEV_PACKAGES with your development packages
-- `src/foo.c` - Remove PNG/JPEG includes and example functions
-- Replace this README with your own documentation
+## Why?
 
-## Install
+This project is my ikigai! In the quiet moments of crafting these utilities, I find flow and peace. There are no deadlines here, no external pressures, no features demanded by work or circumstance. This is code for the sake of code, where the act of creation itself is the purpose. Each function, each optimization, each test is a meditation on the craft. In a world of constant urgency, this library exists as a sanctuary where programming returns to being the simple joy of making something work well.
 
-```
-make check; make install PREFIX=/usr/local
-```
-## Uninstall
-```
-make uninstall PREFIX=$HOME/.local
-```
+## Principles
 
-## Dynamic Linking
+  - Pure C17, portable code
+  - Direct implementations without cleverness
+  - Fully tested with static and dynamic analysis
+  - Performance validated through benchmarking
 
-```
-gcc -std=c17 -Wall -Wextra -g demo.c $(pkg-config --cflags --libs foo) -o demo
-```
-
-## Static Linking
+## Installation
 
 ```bash
-gcc -std=c17 -Wall -Wextra -g -static demo.c $(pkg-config --cflags --libs --static foo) -o demo
+git clone https://github.com/yourusername/libnu.git
+cd libnu
+make install-deps; make check; make install PREFIX=/usr/local
 ```
+
+## Modules
+
+  - [**nu_sort**](src/sort.h) ([example](examples/sort.c)) - Introsort (introspective sort) is a hybrid sorting algorithm that provides both the fast average performance of quicksort and the optimal worst-case performance of heapsort. The algorithm begins with quicksort and monitors recursion depth, switching to heapsort if the depth exceeds 2×log₂(n) to prevent quicksort's O(n²) worst-case behavior. For small subarrays (< 16 elements), it uses insertion sort where its lower overhead provides better performance. This three-way hybrid guarantees O(n log n) worst-case time complexity while maintaining excellent real-world performance through median-of-three pivot selection and other optimizations.

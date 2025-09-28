@@ -40,7 +40,7 @@ TEST_PC_REQUIRES := glib-2.0
 CHECK_PC_PACKAGES := $(LIB_DEPS_PC) $(TEST_PC_REQUIRES)
 
 # Optional tools to check for
-CHECK_OPTIONAL_TOOLS := clang-format ctags
+CHECK_OPTIONAL_TOOLS := ctags
 
 # Compile flags for the library
 DISTRO_CFLAGS := -D_DARWIN_C_SOURCE \
@@ -58,5 +58,5 @@ TEST_CFLAGS := $(DISTRO_CFLAGS) $(TEST_GLIB_CFLAGS)
 # Test-specific linker flags (includes all libraries needed for tests)
 TEST_LDFLAGS := $(DISTRO_LDFLAGS) $(TEST_GLIB_LIBS)
 
-DEV_PACKAGES := libpng jpeg glib pkg-config clang-format
+DEV_PACKAGES := libpng jpeg glib pkg-config
 INSTALL_DEPS_CMD := xcode-select --install; brew install $(DEV_PACKAGES)
