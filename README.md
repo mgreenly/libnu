@@ -18,9 +18,7 @@ This project is my ikigai! In the quiet moments of crafting these utilities, I f
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/libnu.git
-cd libnu
-make install-deps; make check; make install PREFIX=/usr/local
+make check && make install PREFIX=$HOME/.local
 ```
 
 ## Modules
