@@ -180,8 +180,11 @@ examples: $(STATIC_LIB) $(EXAMPLE_PROGS)
 	@echo "All examples built successfully"
 
 # Pattern rule for building example binaries
+# Create a fake nu/ directory mapping to src/ for development builds
 examples/%: examples/%.c $(STATIC_LIB)
-	$(CC) $(CFLAGS_EXAMPLES) $< -I$(SRCDIR) $(STATIC_LIB) -o $@
+	@mkdir -p $(TMPDIR)/include/nu
+	@for h in src/*.h; do ln -sf ../../../$$h $(TMPDIR)/include/nu/; done
+	$(CC) $(CFLAGS_EXAMPLES) $< -I$(TMPDIR)/include $(STATIC_LIB) -o $@
 
 clean:
 	rm -rf $(OBJDIR) $(LIBDIR) $(REPORTSDIR) $(TMPDIR) tags $(SRCDIR)/version.h $(EXAMPLE_PROGS)
@@ -227,9 +230,7 @@ install: $(STATIC_LIB) $(DYNAMIC_LIB) $(TMPDIR)/$(LIBNAME).pc
 	install -m 755 $(DYNAMIC_LIB) $(LIBDIR_INSTALL)/
 	cd $(LIBDIR_INSTALL) && ln -sf lib$(LIBNAME).so.$(VERSION) lib$(LIBNAME).so.$(SOVERSION)
 	cd $(LIBDIR_INSTALL) && ln -sf lib$(LIBNAME).so.$(VERSION) lib$(LIBNAME).so
-	install -m 644 src/sort.h $(PREFIX)/include/$(LIBNAME)/
-	install -m 644 src/error.h $(PREFIX)/include/$(LIBNAME)/
-	install -m 644 src/version.h $(PREFIX)/include/$(LIBNAME)/
+	install -m 644 src/*.h $(PREFIX)/include/$(LIBNAME)/
 	install -m 644 $(TMPDIR)/$(LIBNAME).pc $(PREFIX)/lib/pkgconfig/
 
 uninstall:
