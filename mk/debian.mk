@@ -20,12 +20,11 @@ LIB_DEPS_PC := #lib$(PNG_NAME) lib$(JPEG_NAME)
 PC_REQUIRES := $(LIB_DEPS_PC)
 
 # test-only deps
-TEST_GLIB_LIBS := $(shell pkg-config --libs glib-2.0 2>/dev/null)
-TEST_GLIB_CFLAGS := $(shell pkg-config --cflags glib-2.0 2>/dev/null)
-TEST_PC_REQUIRES := glib-2.0
+# GLib no longer required
+TEST_PC_REQUIRES :=
 
 # All pkg-config packages we need to check for
-CHECK_PC_PACKAGES := $(LIB_DEPS_PC) $(TEST_PC_REQUIRES)
+CHECK_PC_PACKAGES := $(LIB_DEPS_PC)
 
 # Optional tools to check for
 CHECK_OPTIONAL_TOOLS := ctags cppcheck
@@ -42,8 +41,8 @@ DISTRO_LDFLAGS := -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,--as-needed -pi
   $(LIB_DEPS_LIBS)
 
 # test-specific flags
-TEST_CFLAGS := $(DISTRO_CFLAGS) $(TEST_GLIB_CFLAGS)
-TEST_LDFLAGS := $(DISTRO_LDFLAGS) $(TEST_GLIB_LIBS)
+TEST_CFLAGS := $(DISTRO_CFLAGS)
+TEST_LDFLAGS := $(DISTRO_LDFLAGS)
 
-DEV_PACKAGES := build-essential libpng-dev libjpeg-dev libglib2.0-dev pkg-config cppcheck
+DEV_PACKAGES := build-essential libpng-dev libjpeg-dev pkg-config cppcheck
 INSTALL_DEPS_CMD := sudo apt-get install $(DEV_PACKAGES)

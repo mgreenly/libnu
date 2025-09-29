@@ -32,12 +32,11 @@ LIB_DEPS_PC := lib$(PNG_NAME) lib$(JPEG_NAME)
 PC_REQUIRES := $(LIB_DEPS_PC)
 
 # Test-only dependencies (not linked into the library)
-TEST_GLIB_LIBS := $(shell pkg-config --libs glib-2.0 2>/dev/null)
-TEST_GLIB_CFLAGS := $(shell pkg-config --cflags glib-2.0 2>/dev/null)
-TEST_PC_REQUIRES := glib-2.0
+# GLib no longer required
+TEST_PC_REQUIRES :=
 
 # All pkg-config packages we need to check for
-CHECK_PC_PACKAGES := $(LIB_DEPS_PC) $(TEST_PC_REQUIRES)
+CHECK_PC_PACKAGES := $(LIB_DEPS_PC)
 
 # Optional tools to check for
 CHECK_OPTIONAL_TOOLS := ctags
@@ -53,10 +52,10 @@ DISTRO_LDFLAGS := -Wl,-dead_strip -Wl,-pie \
   $(LIB_DEPS_LIBS)
 
 # Test-specific compile flags (includes test framework headers)
-TEST_CFLAGS := $(DISTRO_CFLAGS) $(TEST_GLIB_CFLAGS)
+TEST_CFLAGS := $(DISTRO_CFLAGS)
 
 # Test-specific linker flags (includes all libraries needed for tests)
-TEST_LDFLAGS := $(DISTRO_LDFLAGS) $(TEST_GLIB_LIBS)
+TEST_LDFLAGS := $(DISTRO_LDFLAGS)
 
-DEV_PACKAGES := libpng jpeg glib pkg-config
+DEV_PACKAGES := libpng jpeg pkg-config
 INSTALL_DEPS_CMD := xcode-select --install; brew install $(DEV_PACKAGES)

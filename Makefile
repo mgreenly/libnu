@@ -318,13 +318,6 @@ check-deps:
 		echo "All required dependencies satisfied!"; \
 	fi
 
-require-glib:
-	@pkg-config --exists glib-2.0 || { \
-		echo "Error: GLib 2.0 not found. Please install libglib2.0-dev"; \
-		echo "Run: $(INSTALL_DEPS_CMD)"; \
-		exit 1; \
-	}
-
 # Pattern rules for coverage builds - each test links only its corresponding source
 # All tests get TEST_FLAGS and test_malloc.c for consistent memory testing
 # Default pattern: foo_test_cov needs src/foo.c and test_malloc.c
