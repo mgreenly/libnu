@@ -51,8 +51,8 @@ CFLAGS = $(CFLAGS_BASE) $(DISTRO_CFLAGS)
 
 LDFLAGS = $(DISTRO_LDFLAGS)
 
-# Library source files
-LIB_SOURCES := $(SRCDIR)/nulib.c $(SRCDIR)/sort.c
+# Library source files - automatically discover all *.c files in src/
+LIB_SOURCES := $(wildcard $(SRCDIR)/*.c)
 LIB_OBJECTS := $(LIB_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 LIB_DEPS := $(LIB_OBJECTS:.o=.d)
 
@@ -142,10 +142,9 @@ $(DYNAMIC_LIB): $(LIB_OBJECTS) | $(LIBDIR)
 	cd $(LIBDIR) && ln -sf lib$(LIBNAME).so.$(VERSION) lib$(LIBNAME).so
 
 
-# Benchmark sources and binaries
-BENCH_TEST_SRCS := $(filter-out bench/bench_utils.c, $(wildcard bench/bench_*.c))
-BENCH_UTILS := $(TMPDIR)/bench_utils.o
-BENCH_PROGS := $(patsubst bench/bench_%.c,$(TMPDIR)/bench_%,$(BENCH_TEST_SRCS))
+# Benchmark sources and binaries using nu/bench.h (*_bench.c pattern)
+BENCH_SRCS := $(wildcard bench/*_bench.c)
+BENCH_PROGS := $(patsubst bench/%_bench.c,$(TMPDIR)/%_bench,$(BENCH_SRCS))
 
 # Build and run all benchmarks
 bench: $(TMPDIR) $(BENCH_PROGS)
@@ -156,17 +155,12 @@ bench: $(TMPDIR) $(BENCH_PROGS)
 		nice -n -20 $$prog 2>/dev/null || $$prog; \
 	done
 
-# Pattern rule for building benchmark binaries
-$(TMPDIR)/bench_%: $(TMPDIR)/bench_%.o $(BENCH_UTILS) $(STATIC_LIB)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
-
-# Compile benchmark object files
-$(TMPDIR)/bench_%.o: bench/bench_%.c | $(TMPDIR)
-	$(CC) $(CFLAGS) -I$(SRCDIR) -c $< -o $@
-
-# Compile benchmark utils
-$(TMPDIR)/bench_utils.o: bench/bench_utils.c | $(TMPDIR)
-	$(CC) $(CFLAGS) -I$(SRCDIR) -c $< -o $@
+# Pattern rule for building benchmark binaries (*_bench pattern)
+# Each bench/X_bench.c is expected to benchmark src/X.c
+$(TMPDIR)/%_bench: bench/%_bench.c src/%.c $(SRCDIR)/version.h | $(TMPDIR)
+	@mkdir -p $(TMPDIR)/include/nu
+	@for h in src/*.h; do ln -sf ../../../$$h $(TMPDIR)/include/nu/; done
+	$(CC) $(CFLAGS) -O2 $< src/$*.c -I$(TMPDIR)/include -o $@
 
 $(TMPDIR):
 	mkdir -p $(TMPDIR)
@@ -410,14 +404,14 @@ analyze:
 	@mkdir -p $(REPORTSDIR) $(TMPDIR)
 	@command -v clang >/dev/null 2>&1 && { \
 		echo "Using clang static analyzer..."; \
-		if clang --analyze $(filter-out -MMD -MP -fanalyzer,$(CFLAGS)) -I./src src/nulib.c src/sort.c; then \
+		if clang --analyze $(filter-out -MMD -MP -fanalyzer,$(CFLAGS)) -I./src $(LIB_SOURCES); then \
 			echo "Static analysis completed - no issues found!"; \
 		fi; \
 		mv *.plist $(REPORTSDIR)/ 2>/dev/null || true; \
 	} || { \
 		echo "clang not found, trying cppcheck..."; \
 		command -v cppcheck >/dev/null 2>&1 && { \
-			cppcheck --enable=all --std=c17 --suppress=missingIncludeSystem --suppress=missingInclude src/*.c --quiet && \
+			cppcheck --enable=all --std=c17 --suppress=missingIncludeSystem --suppress=missingInclude $(LIB_SOURCES) --quiet && \
 			echo "Static analysis completed - no issues found!"; \
 		} || { \
 			echo "No static analysis tools found. Install clang or cppcheck."; \
