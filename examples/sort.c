@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../src/nulib.h"
 #include "../src/sort.h"
 
 /*
@@ -104,7 +103,7 @@ static void print_people(const char* title, Person people[], size_t count) {
 
 int main(void) {
     printf("==============================================================\n");
-    printf("           nu_sort Tutorial - Version %s\n", nu_version());
+    printf("                      nu_sort Tutorial\n");
     printf("==============================================================\n");
 
     /*

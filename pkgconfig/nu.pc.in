@@ -1,13 +1,13 @@
-prefix=${PREFIX}
+prefix=@PREFIX@
 exec_prefix=${prefix}
-libdir=${LIBDIR_INSTALL}
+libdir=@LIBDIR_INSTALL@
 includedir=${prefix}/include
 
 Name: nu
 Description: A collection of essential C utilities
-Version: ${VERSION}
+Version: @VERSION@
 URL: https://github.com/example/libnu
-Requires: ${PC_REQUIRES}
+Requires: @PC_REQUIRES@
 Requires.private:
 Libs: -L${libdir} -Wl,-rpath,${libdir} -lnu
 Libs.private:

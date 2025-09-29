@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "bench_utils.h"
-#include "nulib.h"
+#include "sort.h"
 
 static int compare_ints(const void *a, const void *b) {
     int ia = *(const int*)a;

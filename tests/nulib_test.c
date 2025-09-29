@@ -6,13 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "../src/nulib.h"
+#include "../src/version.h"
 
 static void
 test_version_string
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_version_string... ");
   const char* version = nu_version();
   assert(version != NULL);
@@ -22,9 +21,8 @@ test_version_string
 
 static void
 test_version_numbers
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_version_numbers... ");
   assert(nu_version_major() == 0);
   assert(nu_version_minor() == 1);
@@ -37,9 +35,8 @@ test_version_numbers
 
 static void
 test_version_macros
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_version_macros... ");
   assert(NULIB_VERSION_MAJOR == 0);
   assert(NULIB_VERSION_MINOR == 1);
@@ -50,9 +47,8 @@ test_version_macros
 
 int
 main
-(
-  void
-) {
+  ( void
+  ) {
   printf("Running nulib version tests...\n");
 
   test_version_string();

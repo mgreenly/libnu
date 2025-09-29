@@ -9,9 +9,8 @@
 
 static size_t
 floor_log2
-(
-  size_t n
-) {
+  ( size_t n
+  ) {
   size_t log = 0;
   while (n >>= 1) {
     log++;
@@ -21,11 +20,10 @@ floor_log2
 
 static void
 swap_bytes
-(
-  void* a,
+  ( void* a,
   void* b,
   size_t size
-) {
+  ) {
   char* pa = (char*) a;
   char* pb = (char*) b;
   char temp;
@@ -39,23 +37,21 @@ swap_bytes
 
 static void*
 get_element
-(
-  void* base,
+  ( void* base,
   size_t index,
   size_t size
-) {
+  ) {
   return (char*) base + index * size;
 }
 
 static void
 insertion_sort
-(
-  void* base,
+  ( void* base,
   size_t low,
   size_t high,
   size_t size,
   int (* compar)(const void*, const void*)
-) {
+  ) {
   char* key = MALLOC(size);
   if (!key)
     return;
@@ -76,13 +72,12 @@ insertion_sort
 
 static void
 heapify
-(
-  void* base,
+  ( void* base,
   size_t start,
   size_t end,
   size_t size,
   int (* compar)(const void*, const void*)
-) {
+  ) {
   size_t root = start;
 
   while (2 * root + 1 <= end) {
@@ -108,13 +103,12 @@ heapify
 
 static void
 heapsort
-(
-  void* base,
+  ( void* base,
   size_t low,
   size_t high,
   size_t size,
   int (* compar)(const void*, const void*)
-) {
+  ) {
   size_t count    = high - low + 1;
   void* heap_base = get_element(base, low, size);
 
@@ -130,13 +124,12 @@ heapsort
 
 static size_t
 partition
-(
-  void* base,
+  ( void* base,
   size_t low,
   size_t high,
   size_t size,
   int (* compar)(const void*, const void*)
-) {
+  ) {
   size_t pivot_idx = low + (high - low) / 2;
   swap_bytes(get_element(base, pivot_idx, size), get_element(base, high, size), size);
 
@@ -156,14 +149,13 @@ partition
 
 static void
 introsort_impl
-(
-  void* base,
+  ( void* base,
   size_t low,
   size_t high,
   size_t depth_limit,
   size_t size,
   int (* compar)(const void*, const void*)
-) {
+  ) {
   typedef struct {
     size_t low;
     size_t high;
@@ -213,12 +205,11 @@ introsort_impl
 
 void
 nu_sort
-(
-  void* base,
+  ( void* base,
   size_t nmemb,
   size_t size,
   int (* compar)(const void*, const void*)
-) {
+  ) {
   if (!base || !compar || nmemb <= 1 || size == 0) {
     return;
   }

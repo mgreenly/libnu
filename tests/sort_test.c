@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
-#include "../src/nulib.h"
+#include "../src/sort.h"
 
 /* Always include test malloc for all tests */
 #include "test_malloc.h"
@@ -11,10 +11,9 @@
 /* Test utilities */
 static int
 compare_ints
-(
-  const void* a,
+  ( const void* a,
   const void* b
-) {
+  ) {
   int ia = *(const int*) a;
   int ib = *(const int*) b;
   return (ia > ib) - (ia < ib);
@@ -22,10 +21,9 @@ compare_ints
 
 static int
 compare_strings
-(
-  const void* a,
+  ( const void* a,
   const void* b
-) {
+  ) {
   const char* const* pa = (const char* const*) a;
   const char* const* pb = (const char* const*) b;
   return strcmp(*pa, *pb);
@@ -33,11 +31,10 @@ compare_strings
 
 static int
 arrays_equal_int
-(
-  int* a,
+  ( int* a,
   int* b,
   size_t n
-) {
+  ) {
   for (size_t i = 0; i < n; i++) {
     if (a[i] != b[i])return 0;
   }
@@ -46,10 +43,9 @@ arrays_equal_int
 
 static int
 is_sorted_int
-(
-  int* arr,
+  ( int* arr,
   size_t n
-) {
+  ) {
   for (size_t i = 1; i < n; i++) {
     if (arr[i] < arr[i-1])return 0;
   }
@@ -59,9 +55,8 @@ is_sorted_int
 /* Basic functionality tests */
 static void
 test_empty_array
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_empty_array... ");
   int* arr = NULL;
   nu_sort(arr, 0, sizeof(int), compare_ints);
@@ -70,9 +65,8 @@ test_empty_array
 
 static void
 test_single_element
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_single_element... ");
   int arr[] = {42};
   nu_sort(arr, 1, sizeof(int), compare_ints);
@@ -82,9 +76,8 @@ test_single_element
 
 static void
 test_already_sorted
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_already_sorted... ");
   int arr[]      = {1, 2, 3, 4, 5};
   int expected[] = {1, 2, 3, 4, 5};
@@ -95,9 +88,8 @@ test_already_sorted
 
 static void
 test_reverse_sorted
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_reverse_sorted... ");
   int arr[]      = {5, 4, 3, 2, 1};
   int expected[] = {1, 2, 3, 4, 5};
@@ -108,9 +100,8 @@ test_reverse_sorted
 
 static void
 test_duplicates
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_duplicates... ");
   int arr[]      = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3};
   int expected[] = {1, 1, 2, 3, 3, 4, 5, 5, 6, 9};
@@ -121,9 +112,8 @@ test_duplicates
 
 static void
 test_mixed_signs
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_mixed_signs... ");
   int arr[]      = {-5, 3, -1, 0, 7, -2};
   int expected[] = {-5, -2, -1, 0, 3, 7};
@@ -134,9 +124,8 @@ test_mixed_signs
 
 static void
 test_strings
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_strings... ");
   const char* arr[]      = {"zebra", "apple", "banana", "cherry"};
   const char* expected[] = {"apple", "banana", "cherry", "zebra"};
@@ -151,9 +140,8 @@ test_strings
 
 static void
 test_invalid_params
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_invalid_params... ");
   int arr[] = {1, 2, 3};
 
@@ -168,9 +156,8 @@ test_invalid_params
 /* Performance tests */
 static void
 test_large_array
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_large_array (1000 elements)... ");
   const size_t n = 1000;
   int* arr       = malloc(n * sizeof(int));
@@ -192,9 +179,8 @@ test_large_array
 
 static void
 test_pathological_all_same
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_pathological_all_same (1000 elements)... ");
   const size_t n = 1000;
   int* arr       = malloc(n * sizeof(int));
@@ -216,9 +202,8 @@ test_pathological_all_same
 /* Stress tests */
 static void
 stress_test_very_large_array
-(
-  void
-) {
+  ( void
+  ) {
   printf("  stress_test_very_large (100k elements)... ");
   const size_t n = 100000;
   int* arr       = malloc(n * sizeof(int));
@@ -242,9 +227,8 @@ stress_test_very_large_array
 
 static void
 stress_test_worst_case_sorted
-(
-  void
-) {
+  ( void
+  ) {
   printf("  stress_test_worst_case_sorted (50k elements)... ");
   const size_t n = 50000;
   int* arr       = malloc(n * sizeof(int));
@@ -267,9 +251,8 @@ stress_test_worst_case_sorted
 
 static void
 stress_test_worst_case_reverse
-(
-  void
-) {
+  ( void
+  ) {
   printf("  stress_test_worst_case_reverse (50k elements)... ");
   const size_t n = 50000;
   int* arr       = malloc(n * sizeof(int));
@@ -292,9 +275,8 @@ stress_test_worst_case_reverse
 
 static void
 stress_test_many_duplicates
-(
-  void
-) {
+  ( void
+  ) {
   printf("  stress_test_many_duplicates (50k elements, 10 unique)... ");
   const size_t n = 50000;
   int* arr       = malloc(n * sizeof(int));
@@ -319,9 +301,8 @@ stress_test_many_duplicates
 // Test that triggers stack overflow protection (with QUICKSORT_STACK_SIZE=8)
 static void
 test_stack_overflow_protection
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_stack_overflow_protection... ");
 
   // With stack size 8, this will trigger overflow protection
@@ -339,9 +320,8 @@ test_stack_overflow_protection
 // Test depth limit protection
 static void
 test_depth_limit_protection
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_depth_limit_protection... ");
 
   // Create array that will hit depth limit
@@ -370,9 +350,8 @@ test_depth_limit_protection
 // Test invalid parameters for coverage
 static void
 test_invalid_params_coverage
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_invalid_params_coverage... ");
 
   int arr[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
@@ -403,9 +382,8 @@ test_invalid_params_coverage
 // Test malloc failure in insertion_sort
 static void
 test_malloc_failure
-(
-  void
-) {
+  ( void
+  ) {
   printf("  test_malloc_failure... ");
 
   // Create array that will trigger insertion_sort (needs < 16 elements)
@@ -430,17 +408,9 @@ test_malloc_failure
 
 int
 main
-(
-  void
-) {
+  ( void
+  ) {
   printf("Running nu_sort tests...\n");
-
-  /* Also test version functions to ensure coverage */
-  printf("Library version: %s (%d.%d.%d)\n",
-         nu_version(),
-         nu_version_major(),
-         nu_version_minor(),
-         nu_version_patch());
 
   printf("\nBasic tests:\n");
   test_empty_array();
