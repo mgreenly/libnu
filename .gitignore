@@ -1,0 +1,60 @@
+# Build directories
+obj/
+bin/
+lib/
+reports/
+tmp/
+
+# Generated files
+*.o
+*.d
+*.gcno
+*.gcda
+*.gcov
+*.plist
+src/version.h
+
+# Executables
+bin/
+
+# Vendor dependencies (configured by ./configure)
+vendor/
+
+# agent config
+.claude
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS files
+.directory
+
+# Backup files
+*.bak
+*.orig
+
+# Core dumps
+core
+core.*
+
+# Debug files
+*.dSYM/
+*.su
+
+# Static analysis output
+*.sarif
+
+# Documentation build
+docs/_build/
+docs/html/
+docs/latex/
+
+example/demo
+
+# Development planning
+TODO.md
