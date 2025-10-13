@@ -23,10 +23,10 @@ main (void)
   printf("Patch version:  %d\n", nu_version_patch());
 
   printf("\nVersion check at compile time:\n");
-  printf("NULIB_VERSION_STRING: %s\n", NULIB_VERSION_STRING);
-  printf("NULIB_VERSION_MAJOR:  %d\n", NULIB_VERSION_MAJOR);
-  printf("NULIB_VERSION_MINOR:  %d\n", NULIB_VERSION_MINOR);
-  printf("NULIB_VERSION_PATCH:  %d\n", NULIB_VERSION_PATCH);
+  printf("NU_VERSION_STRING: %s\n", NU_VERSION_STRING);
+  printf("NU_VERSION_MAJOR:  %d\n", NU_VERSION_MAJOR);
+  printf("NU_VERSION_MINOR:  %d\n", NU_VERSION_MINOR);
+  printf("NU_VERSION_PATCH:  %d\n", NU_VERSION_PATCH);
 
   // Example of version checking
   printf("\nVersion checking example:\n");
@@ -39,8 +39,8 @@ main (void)
       nu_version_patch());
   }
 
-  // Using the NULIB_VERSION macro for compile-time checks
-  printf("\nCompiled version code: %d\n", NULIB_VERSION);
+  // Using the NU_VERSION macro for compile-time checks
+  printf("\nCompiled version code: %d\n", NU_VERSION);
   printf("(calculated as major*10000 + minor*100 + patch)\n");
 
   return 0;

@@ -241,7 +241,7 @@ NU_TEST(test_many_duplicates_large) {
   return nu_ok(NULL);
 }
 
-// Test that triggers stack overflow protection (with QUICKSORT_STACK_SIZE=8)
+// Test that triggers stack overflow protection (with NU_QUICKSORT_STACK_SIZE=8)
 NU_TEST(test_stack_overflow_protection) {
   // With stack size 8, this will trigger overflow protection
   const size_t n = 100;

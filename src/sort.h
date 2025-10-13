@@ -1,5 +1,5 @@
-#ifndef NULIB_SORT_H
-#define NULIB_SORT_H
+#ifndef NU_SORT_H
+#define NU_SORT_H
 
 /**
  * @file sort.h
@@ -36,8 +36,8 @@ extern void NU_FREE(void* ptr);
 
 #endif
 
-#ifndef QUICKSORT_STACK_SIZE
-#define QUICKSORT_STACK_SIZE 64
+#ifndef NU_QUICKSORT_STACK_SIZE
+#define NU_QUICKSORT_STACK_SIZE 64
 #endif
 
 /**
@@ -57,4 +57,4 @@ extern void NU_FREE(void* ptr);
  */
 void nu_sort(void* base, size_t nmemb, size_t size, int (*compar)(const void*, const void*));
 
-#endif /* NULIB_SORT_H */
+#endif /* NU_SORT_H */

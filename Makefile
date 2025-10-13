@@ -45,7 +45,7 @@ CFLAGS_TEST = $(filter-out -Wmissing-prototypes,$(CFLAGS_COMMON)) $(CFLAGS_DEBUG
 CFLAGS_EXAMPLES = $(filter-out -MMD -MP,$(CFLAGS_BASE)) $(DISTRO_CFLAGS)
 
 # Test-specific flags for stack size configuration
-TEST_FLAGS = -DQUICKSORT_STACK_SIZE=8
+TEST_FLAGS = -DNU_QUICKSORT_STACK_SIZE=8
 
 CFLAGS = $(CFLAGS_BASE) $(DISTRO_CFLAGS)
 
@@ -89,18 +89,18 @@ $(LIBDIR):
 # Generate version.h from Makefile variables
 $(SRCDIR)/version.h: Makefile
 	@echo "Generating version.h..."
-	@echo "#ifndef NULIB_VERSION_H" > $@
-	@echo "#define NULIB_VERSION_H" >> $@
+	@echo "#ifndef NU_VERSION_H" > $@
+	@echo "#define NU_VERSION_H" >> $@
 	@echo "" >> $@
-	@echo "#define NULIB_VERSION_MAJOR $(VERSION_MAJOR)" >> $@
-	@echo "#define NULIB_VERSION_MINOR $(VERSION_MINOR)" >> $@
-	@echo "#define NULIB_VERSION_PATCH $(VERSION_PATCH)" >> $@
+	@echo "#define NU_VERSION_MAJOR $(VERSION_MAJOR)" >> $@
+	@echo "#define NU_VERSION_MINOR $(VERSION_MINOR)" >> $@
+	@echo "#define NU_VERSION_PATCH $(VERSION_PATCH)" >> $@
 	@echo "" >> $@
-	@echo "#define NULIB_VERSION_STRING \"$(VERSION)\"" >> $@
+	@echo "#define NU_VERSION_STRING \"$(VERSION)\"" >> $@
 	@echo "" >> $@
-	@echo "#define NULIB_MAKE_VERSION(major, minor, patch) ((major) * 10000 + (minor) * 100 + (patch))" >> $@
+	@echo "#define NU_MAKE_VERSION(major, minor, patch) ((major) * 10000 + (minor) * 100 + (patch))" >> $@
 	@echo "" >> $@
-	@echo "#define NULIB_VERSION NULIB_MAKE_VERSION(NULIB_VERSION_MAJOR, NULIB_VERSION_MINOR, NULIB_VERSION_PATCH)" >> $@
+	@echo "#define NU_VERSION NU_MAKE_VERSION(NU_VERSION_MAJOR, NU_VERSION_MINOR, NU_VERSION_PATCH)" >> $@
 	@echo "" >> $@
 	@echo "/**" >> $@
 	@echo " * @brief Get the version string of the nu library" >> $@
