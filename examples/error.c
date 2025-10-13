@@ -181,7 +181,7 @@ parse_server_config (const char* config_text, ServerConfig* config)
     if (strcmp(key, "name") == 0) {
       strncpy(config->name, value, sizeof(config->name) - 1);
       config->name[sizeof(config->name) - 1] = '\0';
-    }else if (strcmp(key, "port") == 0)  {
+    }else if (strcmp(key, "port") == 0) {
       int port;
       nu_result_t int_result = parse_int(value, &port);
       if (nu_is_err(&int_result)) {
@@ -192,7 +192,7 @@ parse_server_config (const char* config_text, ServerConfig* config)
         NU_RETURN_IF_ERR(nu_check_range((size_t)port, 1, 65535, "port"));
         config->port = port;
       }
-    }else if (strcmp(key, "max_connections") == 0)  {
+    }else if (strcmp(key, "max_connections") == 0) {
       int max_conn;
       nu_result_t int_result = parse_int(value, &max_conn);
       if (nu_is_err(&int_result)) {
@@ -201,11 +201,11 @@ parse_server_config (const char* config_text, ServerConfig* config)
       } else {
         config->max_connections = max_conn;
       }
-    }else if (strcmp(key, "verbose") == 0)  {
+    }else if (strcmp(key, "verbose") == 0) {
       config->verbose = (strcmp(value, "true") == 0 ||
         strcmp(value, "yes") == 0 ||
         strcmp(value, "1") == 0);
-    }else  {
+    }else {
       printf("   Info: Unknown configuration key '%s' (ignoring)\n", key);
     }
 

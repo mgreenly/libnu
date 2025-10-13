@@ -9,6 +9,6 @@ Version: @VERSION@
 URL: https://github.com/example/libnu
 Requires: @PC_REQUIRES@
 Requires.private:
-Libs: -L${libdir} -Wl,-rpath,${libdir} -lnu
+Libs: -L${libdir} -Wl,-rpath-link,${libdir} -Wl,-rpath,${libdir} -lnu
 Libs.private:
 Cflags: -I${includedir}/nu

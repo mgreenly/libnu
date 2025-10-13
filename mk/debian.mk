@@ -27,7 +27,7 @@ TEST_PC_REQUIRES :=
 CHECK_PC_PACKAGES := $(LIB_DEPS_PC)
 
 # Optional tools to check for
-CHECK_OPTIONAL_TOOLS := ctags cppcheck
+CHECK_OPTIONAL_TOOLS := ctags cppcheck uncrustify clang
 
 # compile flags
 DISTRO_CFLAGS := -D_DEFAULT_SOURCE \
@@ -44,5 +44,5 @@ DISTRO_LDFLAGS := -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,--as-needed -pi
 TEST_CFLAGS := $(DISTRO_CFLAGS)
 TEST_LDFLAGS := $(DISTRO_LDFLAGS)
 
-DEV_PACKAGES := build-essential libpng-dev libjpeg-dev pkg-config cppcheck
+DEV_PACKAGES := build-essential libpng-dev libjpeg-dev pkg-config cppcheck uncrustify clang universal-ctags
 INSTALL_DEPS_CMD := sudo apt-get install $(DEV_PACKAGES)

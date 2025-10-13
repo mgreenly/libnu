@@ -39,7 +39,7 @@ TEST_PC_REQUIRES :=
 CHECK_PC_PACKAGES := $(LIB_DEPS_PC)
 
 # Optional tools to check for
-CHECK_OPTIONAL_TOOLS := ctags
+CHECK_OPTIONAL_TOOLS := ctags uncrustify
 
 # Compile flags for the library
 DISTRO_CFLAGS := -D_DARWIN_C_SOURCE \
@@ -57,5 +57,5 @@ TEST_CFLAGS := $(DISTRO_CFLAGS)
 # Test-specific linker flags (includes all libraries needed for tests)
 TEST_LDFLAGS := $(DISTRO_LDFLAGS)
 
-DEV_PACKAGES := libpng jpeg pkg-config
+DEV_PACKAGES := libpng jpeg pkg-config uncrustify ctags
 INSTALL_DEPS_CMD := xcode-select --install; brew install $(DEV_PACKAGES)

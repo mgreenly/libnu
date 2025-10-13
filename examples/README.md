@@ -4,7 +4,12 @@ This directory contains example programs demonstrating the usage of different nu
 
 ## Available Examples
 
+- `arena.c` - Demonstrates the arena allocator with mark/restore functionality
+- `bench.c` - Shows how to use the nu/bench.h benchmarking utilities
+- `error.c` - Demonstrates error handling with the nu/error.h module
 - `sort.c` - Demonstrates the introsort implementation from the sort module
+- `test.c` - Shows how to use the nu/test.h testing framework
+- `version.c` - Simple example showing how to query the library version
 
 ## Building Examples
 

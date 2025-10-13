@@ -174,7 +174,7 @@ examples: install
 	@echo "Building examples using installed library..."
 	@cd examples && for src in *.c; do \
 		echo "  Compiling $$src..."; \
-		$(CC) -std=c17 -Wall -Wextra -g $$src $$(pkg-config --cflags --libs nu) -o $${src%.c} || exit 1; \
+		PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig:$$PKG_CONFIG_PATH $(CC) -std=c17 -Wall -Wextra -g $$src $$(PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig:$$PKG_CONFIG_PATH pkg-config --cflags --libs nu) -o $${src%.c} || exit 1; \
 	done
 	@echo "All examples built successfully"
 
@@ -229,7 +229,10 @@ $(TMPDIR)/$(LIBNAME).pc: pkgconfig/$(LIBNAME).pc.in | $(TMPDIR)
 	     -e 's|@PC_REQUIRES@|$(PC_REQUIRES)|g' \
 	     $< > $@
 
-install: $(STATIC_LIB) $(DYNAMIC_LIB) $(TMPDIR)/$(LIBNAME).pc
+install:
+	@echo "Building optimized release version for installation..."
+	@$(MAKE) CFLAGS="$(CFLAGS_RELEASE) $(DISTRO_CFLAGS)" PREFIX="$(PREFIX)" clean all
+	@echo "Installing library to $(PREFIX)..."
 	@mkdir -p $(LIBDIR_INSTALL)
 	@mkdir -p $(PREFIX)/include/$(LIBNAME)
 	@mkdir -p $(PREFIX)/lib/pkgconfig
@@ -239,6 +242,7 @@ install: $(STATIC_LIB) $(DYNAMIC_LIB) $(TMPDIR)/$(LIBNAME).pc
 	cd $(LIBDIR_INSTALL) && ln -sf lib$(LIBNAME).so.$(VERSION) lib$(LIBNAME).so
 	install -m 644 src/*.h $(PREFIX)/include/$(LIBNAME)/
 	install -m 644 $(TMPDIR)/$(LIBNAME).pc $(PREFIX)/lib/pkgconfig/
+	@echo "Installation complete!"
 
 uninstall:
 	rm -f $(LIBDIR_INSTALL)/lib$(LIBNAME).a
@@ -270,7 +274,7 @@ help:
 	@echo "  all        - Build static and dynamic libraries (default, debug mode)"
 	@echo "  release    - Build optimized release version"
 	@echo "  clean      - Remove build artifacts"
-	@echo "  install    - Install the library (use PREFIX=/path to specify location)"
+	@echo "  install    - Clean build and install optimized library (use PREFIX=/path)"
 	@echo "  uninstall  - Uninstall the library"
 	@echo "  check      - Run tests"
 	@echo "  bench      - Run benchmarks"
@@ -355,7 +359,7 @@ coverage: $(TEST_PROGS_COV)
 	@for test in $(TEST_PROGS_COV); do \
 		test_name=$$(basename $$test | sed 's/_test_cov$$//'); \
 		echo "  Testing $$test_name module with coverage..."; \
-		if ! $$test; then \
+		if ! $$test 2>/dev/null; then \
 			echo "  ERROR: $$test failed to execute"; \
 			exit 1; \
 		fi; \
@@ -418,7 +422,7 @@ sanitize: clean $(TEST_PROGS_SAN)
 	done
 	@echo "All sanitizer tests passed!"
 
-analyze:
+analyze: $(SRCDIR)/version.h
 	@echo "Running static analysis..."
 	@mkdir -p $(REPORTSDIR) $(TMPDIR)
 	@command -v clang >/dev/null 2>&1 && { \
