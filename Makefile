@@ -176,7 +176,7 @@ examples: install
 	@echo "Building examples using installed library..."
 	@cd examples && for src in *.c; do \
 		echo "  Compiling $$src..."; \
-		PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig:$$PKG_CONFIG_PATH $(CC) -std=c17 -Wall -Wextra -g $$src $$(PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig:$$PKG_CONFIG_PATH pkg-config --cflags --libs nu) -o $${src%.c} || exit 1; \
+		PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig:$$PKG_CONFIG_PATH $(CC) -std=c17 -D_DEFAULT_SOURCE -pthread -Wall -Wextra -g $$src $$(PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig:$$PKG_CONFIG_PATH pkg-config --cflags --libs nu) -o $${src%.c} || exit 1; \
 	done
 	@echo "All examples built successfully"
 

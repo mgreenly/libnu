@@ -5,19 +5,14 @@
  * test framework. The framework dogfoods nu/error.h, showing how Result
  * types provide consistent error handling even in test code.
  *
- * After libnu is installed system-wide:
+ * Compile (after installing libnu):
  *   gcc -o test test.c -lnu
  *   ./test
- *   (use #include <nu/test.h> and #include <nu/error.h>)
- *
- * When building within the libnu source tree:
- *   make examples
- *   ./examples/test
- *   (uses local includes as shown below)
  */
 
 #include <stdint.h>
 #include <nu/test.h>
+#include <nu/error.h>
 
 /*
  * Example 1: Basic Test Structure
@@ -46,15 +41,15 @@ calculate_discount (double price, double discount_percent, double* result)
   NU_RETURN_IF_ERR(nu_check_null(result, "result"));
 
   if (price < 0) {
-    NU_FAIL(NU_ERR_INVALID_ARG, "Price cannot be negative");
+    return ERR(INVALID_ARG, "Price cannot be negative");
   }
 
   if (discount_percent < 0 || discount_percent > 100) {
-    NU_FAIL(NU_ERR_OUT_OF_RANGE, "Discount must be between 0 and 100");
+    return ERR(OUT_OF_RANGE, "Discount must be between 0 and 100");
   }
 
   *result = price * (1.0 - discount_percent / 100.0);
-  return nu_ok(result);
+  return OK(result);
 }
 
 NU_TEST(test_discount_calculator_success) {

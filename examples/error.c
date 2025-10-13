@@ -4,6 +4,9 @@
  * This example demonstrates how to use nu_error for robust error handling
  * in C programs. We'll build a simple configuration file parser to show
  * real-world error handling patterns.
+ *
+ * Compile (after installing libnu):
+ *   gcc -pthread -o error error.c -lnu
  */
 
 #include <stdio.h>
@@ -12,6 +15,8 @@
 #include <ctype.h>
 #include <limits.h>
 #include <stdint.h>
+#include <pthread.h>
+#include <unistd.h>
 #include <nu/error.h>
 
 /*
@@ -59,7 +64,7 @@ parse_int (const char* str, int32_t* out)
 
   // Check for empty string
   if (*str == '\0') {
-    NU_FAIL(NU_ERR_INVALID_ARG, "Empty string cannot be parsed as integer");
+    return ERR(INVALID_ARG, "Empty string cannot be parsed as integer");
   }
 
   // Use strtol for parsing
@@ -68,22 +73,22 @@ parse_int (const char* str, int32_t* out)
 
   // Check for parsing errors
   if (endptr == str) {
-    NU_FAIL(NU_ERR_INVALID_ARG, "No valid digits found");
+    return ERR(INVALID_ARG, "No valid digits found");
   }
 
   // Check for trailing garbage
   while (isspace(*endptr))endptr++;
   if (*endptr != '\0') {
-    NU_FAIL(NU_ERR_INVALID_ARG, "Invalid characters after number");
+    return ERR(INVALID_ARG, "Invalid characters after number");
   }
 
   // Check range
   if (val < INT_MIN || val > INT_MAX) {
-    NU_FAIL(NU_ERR_OUT_OF_RANGE, "Integer value out of range");
+    return ERR(OUT_OF_RANGE, "Integer value out of range");
   }
 
   *out = (int32_t)val;
-  return nu_ok(out);
+  return OK(out);
 }
 
 // Parse a configuration line like "key = value"
@@ -97,7 +102,7 @@ parse_config_line (const char* line, char* key, char* value)
   // Find the equals sign
   const char* equals = strchr(line, '=');
   if (!equals) {
-    NU_FAIL(NU_ERR_INVALID_ARG, "Config line must contain '='");
+    return ERR(INVALID_ARG, "Config line must contain '='");
   }
 
   // Extract key (trim whitespace)
@@ -107,12 +112,12 @@ parse_config_line (const char* line, char* key, char* value)
   while (key_end > key_start && isspace(*key_end))key_end--;
 
   if (key_start > key_end) {
-    NU_FAIL(NU_ERR_INVALID_ARG, "Empty key in config line");
+    return ERR(INVALID_ARG, "Empty key in config line");
   }
 
   size_t key_len = (size_t)(key_end - key_start + 1);
   if (key_len >= 64) {
-    NU_FAIL(NU_ERR_BUFFER_FULL, "Key too long");
+    return ERR(BUFFER_FULL, "Key too long");
   }
 
   // Extract value (trim whitespace)
@@ -123,7 +128,7 @@ parse_config_line (const char* line, char* key, char* value)
 
   size_t val_len        = (size_t)(val_end - val_start + 1);
   if (val_len >= 256) {
-    NU_FAIL(NU_ERR_BUFFER_FULL, "Value too long");
+    return ERR(BUFFER_FULL, "Value too long");
   }
 
   // Copy trimmed strings
@@ -132,7 +137,7 @@ parse_config_line (const char* line, char* key, char* value)
   memcpy(value, val_start, val_len);
   value[val_len] = '\0';
 
-  return nu_ok(NULL);
+  return OK(NULL);
 }
 
 // Parse a complete configuration
@@ -213,7 +218,7 @@ parse_server_config (const char* config_text, ServerConfig* config)
     line = strtok(NULL, "\n");
   }
 
-  return nu_ok(config);
+  return OK(config);
 }
 
 /*
@@ -228,6 +233,82 @@ print_config (const ServerConfig* cfg)
   printf("     Port: %d\n", cfg->port);
   printf("     Max Connections: %d\n", cfg->max_connections);
   printf("     Verbose: %s\n", cfg->verbose ? "yes" : "no");
+}
+
+/*
+ * Thread-safe error handling example functions
+ */
+
+// Simulate work that can fail based on input
+static nu_result_t
+process_item(int item_id)
+{
+  if (item_id < 0) {
+    return ERR(INVALID_ARG, "Item ID cannot be negative: %d", item_id);
+  }
+  if (item_id > 100) {
+    return ERR(OUT_OF_RANGE, "Item ID too large: %d", item_id);
+  }
+  // Simulate some processing
+  usleep(10000); // 10ms
+  return OK(NULL);
+}
+
+// Thread function that processes an item
+static void*
+worker_thread(void* arg)
+{
+  int item_id = *(int*)arg;
+
+  printf("   [Thread %ld] Processing item %d...\n", (long)pthread_self() % 10000, item_id);
+
+  // Do the actual work
+  nu_result_t res = process_item(item_id);
+
+  // Convert result to thread-safe return
+  if (nu_is_err(&res)) {
+    printf("   [Thread %ld] Error occurred for item %d\n", (long)pthread_self() % 10000, item_id);
+    ERR_T_FROM(res.err->code, "%s", res.err->message);
+  }
+
+  printf("   [Thread %ld] Successfully processed item %d\n", (long)pthread_self() % 10000, item_id);
+  OK_T(NULL);
+}
+
+static void
+demonstrate_thread_errors(void)
+{
+  printf("\n\nEXAMPLE 6: Thread-Safe Error Handling\n");
+  printf("   Demonstrating passing errors across thread boundaries:\n\n");
+
+  // Test with multiple threads - mix of valid and invalid items
+  int test_items[] = {5, -10, 50, 200, 25};
+  pthread_t threads[5];
+
+  // Start threads
+  printf("   Starting 5 worker threads...\n\n");
+  for (int i = 0; i < 5; i++) {
+    if (pthread_create(&threads[i], NULL, worker_thread, &test_items[i]) != 0) {
+      printf("   Failed to create thread %d\n", i);
+    }
+  }
+
+  // Collect results
+  printf("\n   Collecting thread results:\n");
+  for (int i = 0; i < 5; i++) {
+    nu_result_t result = COLLECT_THREAD(threads[i]);
+
+    if (nu_is_err(&result)) {
+      printf("   ✗ Item %d failed: %s\n", test_items[i], nu_error_message(result.err));
+    } else {
+      printf("   ✓ Item %d processed successfully\n", test_items[i]);
+    }
+  }
+
+  printf("\n   Thread example shows:\n");
+  printf("   - ERR_T_FROM converts regular errors to thread-safe returns\n");
+  printf("   - OK_T returns heap-allocated success values\n");
+  printf("   - COLLECT_THREAD safely retrieves results from pthread_join\n");
 }
 
 int
@@ -340,6 +421,11 @@ main (void)
   printf("   This eliminates repetitive error checking code.\n");
 
   /*
+   * Example 6: Thread-safe error handling
+   */
+  demonstrate_thread_errors();
+
+  /*
    * Performance and design notes
    */
   printf("\n\nDESIGN NOTES:\n");
@@ -353,11 +439,22 @@ main (void)
    */
   printf("\n\nKEY TAKEAWAYS:\n");
   printf("   1. Always return nu_result_t from fallible functions\n");
-  printf("   2. Use NU_RETURN_IF_ERR to propagate errors cleanly\n");
-  printf("   3. Use NU_FAIL for immediate error returns\n");
-  printf("   4. Check results with nu_is_ok() / nu_is_err()\n");
-  printf("   5. NULL checks are built-in with nu_check_null()\n");
-  printf("   6. Range validation is easy with nu_check_range()\n");
+  printf("   2. Use TRY() or NU_RETURN_IF_ERR to propagate errors cleanly\n");
+  printf("   3. Use ERR() for immediate error returns (cleaner than NU_FAIL)\n");
+  printf("   4. Use OK() for success returns\n");
+  printf("   5. Check results with nu_is_ok() / nu_is_err()\n");
+  printf("   6. NULL checks are built-in with nu_check_null()\n");
+  printf("   7. Range validation is easy with nu_check_range()\n");
+
+  printf("\n\nTHREAD-SAFE ERROR HANDLING:\n");
+  printf("   For passing errors across thread boundaries, use:\n");
+  printf("   • OK_T(value) - Return success from thread (heap-allocated)\n");
+  printf("   • ERR_T(code, fmt, ...) - Return error from thread\n");
+  printf("   • ERR_T_FROM(code, fmt, ...) - Convert existing error to thread return\n");
+  printf("   • RETURN_THREAD_RESULT(res) - Auto-convert nu_result_t to thread result\n");
+  printf("   • COLLECT_THREAD(thread) - Join thread and convert result back\n");
+  printf("   Thread results (nu_thread_result_t) embed errors directly, not as pointers,\n");
+  printf("   making them safe to pass through pthread_join().\n");
 
   printf("\n\nIMPORTANT LIMITATION:\n");
   printf("   Error objects are temporary (compound literals).\n");

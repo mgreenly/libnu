@@ -1,5 +1,13 @@
 # Claude Code Project Guidelines
 
+## CRITICAL: Examples Must Use Installed Headers
+
+**NEVER** include project headers from examples (no `#include "../src/whatever.h"`)!
+- Examples in the `examples/` directory must use the installed library headers
+- Use `#include <nu/header.h>` not `#include "../src/header.h"`
+- Examples should compile with: `gcc -o example example.c -lnu`
+- This shows users how to actually use the library after installation
+
 ## Memory Allocation Pattern
 
 The project uses a configurable memory allocation pattern for testing:

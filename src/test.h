@@ -93,11 +93,12 @@ nu_test_register_impl (
 #define NU_TEST_ERROR(errcode, errmsg) \
         (nu_test_state.last_error = (nu_error_t){ \
     .code = (errcode), \
-    .message = (errmsg), \
     .file = __FILE__, \
-    .line = __LINE__, \
-    .cause = NULL \
-  }, &nu_test_state.last_error)
+    .line = __LINE__ \
+  }, \
+  strncpy(nu_test_state.last_error.message, (errmsg), sizeof(nu_test_state.last_error.message) - 1), \
+  nu_test_state.last_error.message[sizeof(nu_test_state.last_error.message) - 1] = '\0', \
+  &nu_test_state.last_error)
 
 // Test-specific failure macro that uses persistent storage
 #define NU_TEST_FAIL(code, msg) \
@@ -203,16 +204,6 @@ nu_test_run_all (void)
         printf(" → %s", nu_error_message(result.err));
         if (result.err->file) {
           printf(" [%s:%d]", result.err->file, result.err->line);
-        }
-
-        // Print cause chain if present (indented on next lines)
-        nu_error_t* cause = result.err->cause;
-        while (cause) {
-          printf("\n         → %s", nu_error_message(cause));
-          if (cause->file) {
-            printf(" [%s:%d]", cause->file, cause->line);
-          }
-          cause = cause->cause;
         }
       }
       printf("\n");
