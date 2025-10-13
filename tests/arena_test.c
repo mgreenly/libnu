@@ -234,7 +234,7 @@ NU_TEST(test_arena_pattern) {
   int* nums = (int* )nu_arena_alloc_aligned(&arena, sizeof(int) * 10, sizeof(int));
   NU_ASSERT(nums != NULL);
 
-  for (int i = 0; i < 10; i++) {
+  for (int32_t i = 0; i < 10; i++) {
     nums[i] = i * i;
   }
 
@@ -243,8 +243,8 @@ NU_TEST(test_arena_pattern) {
   strcpy(str, "temporary string");
 
   /* Do some work with allocated memory */
-  int sum = 0;
-  for (int i = 0; i < 10; i++) {
+  int32_t sum = 0;
+  for (int32_t i = 0; i < 10; i++) {
     sum += nums[i];
   }
   NU_ASSERT_EQ(sum, 285);

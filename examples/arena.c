@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <nu/arena.h>
 
 /*
@@ -40,7 +41,7 @@ basic_usage_example (void)
   }
 
   // Use the allocated memory
-  for (int i = 0; i < 10; i++) {
+  for (int32_t i = 0; i < 10; i++) {
     numbers[i] = i * i;
   }
 
@@ -77,7 +78,7 @@ mark_restore_example (void)
   nu_arena_init(&arena, buffer, sizeof(buffer));
 
   // Simulate processing multiple items with temporary allocations
-  for (int item = 1; item <= 3; item++) {
+  for (int32_t item = 1; item <= 3; item++) {
     // Mark the current position
     nu_arena_mark mark = nu_arena_get_mark(&arena);
     printf("Processing item %d (arena at %zu bytes)\n", item, nu_arena_used(&arena));
@@ -87,7 +88,7 @@ mark_restore_example (void)
     sprintf(temp_buffer, "Temporary data for item %d", item);
 
     int* temp_array   = (int* )nu_arena_alloc(&arena, sizeof(int) * 50);
-    for (int i = 0; i < 50; i++) {
+    for (int32_t i = 0; i < 50; i++) {
       temp_array[i] = item * i;
     }
 
@@ -137,13 +138,13 @@ aligned_allocation_example (void)
  * No need to free individual nodes - just reset the arena when done!
  */
 typedef struct TreeNode {
-  int value;
+  int32_t value;
   struct TreeNode* left;
   struct TreeNode* right;
 } TreeNode;
 
 static TreeNode*
-create_node (nu_arena* arena, int value)
+create_node (nu_arena* arena, int32_t value)
 {
   TreeNode* node = (TreeNode* )nu_arena_alloc(arena, sizeof(TreeNode));
   if (node) {
@@ -155,11 +156,11 @@ create_node (nu_arena* arena, int value)
 }
 
 static void
-print_tree (TreeNode* node, int depth)
+print_tree (TreeNode* node, int32_t depth)
 {
   if (!node)return;
 
-  for (int i = 0; i < depth; i++)printf("  ");
+  for (int32_t i = 0; i < depth; i++)printf("  ");
   printf("%d\n", node->value);
 
   print_tree(node->left, depth + 1);
@@ -205,8 +206,8 @@ performance_example (void)
 {
   printf("=== Performance Benefits ===\n");
 
-  const int iterations           = 1000;
-  const int allocs_per_iteration = 10;
+  const int32_t iterations           = 1000;
+  const int32_t allocs_per_iteration = 10;
 
   // Arena version
   char buffer[8192];
@@ -216,10 +217,10 @@ performance_example (void)
   printf("Arena allocation: %d iterations, %d allocations each\n",
     iterations, allocs_per_iteration);
 
-  for (int i = 0; i < iterations; i++) {
+  for (int32_t i = 0; i < iterations; i++) {
     nu_arena_mark mark = nu_arena_get_mark(&arena);
 
-    for (int j = 0; j < allocs_per_iteration; j++) {
+    for (int32_t j = 0; j < allocs_per_iteration; j++) {
       void* ptr = nu_arena_alloc(&arena, 64);
       if (!ptr)break;
       // Use the memory

@@ -11,6 +11,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
+#include <stdint.h>
 #include <nu/error.h>
 
 /*
@@ -33,8 +34,8 @@
 // A simple configuration structure for our example
 typedef struct {
   char name[64];
-  int port;
-  int max_connections;
+  int32_t port;
+  int32_t max_connections;
   bool verbose;
 } ServerConfig;
 
@@ -47,7 +48,7 @@ typedef struct {
 
 // Parse a single integer from a string
 static nu_result_t
-parse_int (const char* str, int* out)
+parse_int (const char* str, int32_t* out)
 {
   // Validate inputs using nu_check_null
   NU_RETURN_IF_ERR(nu_check_null(str, "str"));
@@ -81,7 +82,7 @@ parse_int (const char* str, int* out)
     NU_FAIL(NU_ERR_OUT_OF_RANGE, "Integer value out of range");
   }
 
-  *out = (int)val;
+  *out = (int32_t)val;
   return nu_ok(out);
 }
 
@@ -152,8 +153,8 @@ parse_server_config (const char* config_text, ServerConfig* config)
   strncpy(buffer, config_text, sizeof(buffer) - 1);
   buffer[sizeof(buffer) - 1] = '\0';
 
-  char* line   = strtok(buffer, "\n");
-  int line_num = 0;
+  char* line       = strtok(buffer, "\n");
+  int32_t line_num = 0;
 
   while (line) {
     line_num++;
@@ -182,7 +183,7 @@ parse_server_config (const char* config_text, ServerConfig* config)
       strncpy(config->name, value, sizeof(config->name) - 1);
       config->name[sizeof(config->name) - 1] = '\0';
     }else if (strcmp(key, "port") == 0) {
-      int port;
+      int32_t port;
       nu_result_t int_result = parse_int(value, &port);
       if (nu_is_err(&int_result)) {
         printf("   Warning: Invalid port value '%s': %s (using default)\n",
@@ -193,7 +194,7 @@ parse_server_config (const char* config_text, ServerConfig* config)
         config->port = port;
       }
     }else if (strcmp(key, "max_connections") == 0) {
-      int max_conn;
+      int32_t max_conn;
       nu_result_t int_result = parse_int(value, &max_conn);
       if (nu_is_err(&int_result)) {
         printf("   Warning: Invalid max_connections '%s': %s (using default)\n",
@@ -252,8 +253,8 @@ main (void)
     NULL                // NULL pointer
   };
 
-  for (int i = 0; i < 7; i++) {
-    int value          = 0;
+  for (int32_t i = 0; i < 7; i++) {
+    int32_t value      = 0;
     printf("   Parsing '%s':\n", test_numbers[i] ? test_numbers[i] : "NULL");
 
     nu_result_t result = parse_int(test_numbers[i], &value);

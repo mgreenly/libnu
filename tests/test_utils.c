@@ -1,10 +1,11 @@
 #include "test_utils.h"
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 
-static int malloc_fail_after = -1;
-static int malloc_call_count = 0;
-static bool malloc_enabled   = true;
+static int32_t malloc_fail_after = -1;
+static int32_t malloc_call_count = 0;
+static bool malloc_enabled       = true;
 
 void*
 test_malloc (size_t size)
@@ -25,7 +26,7 @@ test_malloc (size_t size)
 }
 
 void
-test_malloc_set_fail_after (int count)
+test_malloc_set_fail_after (int32_t count)
 {
   malloc_fail_after = count;
   malloc_call_count = 0;

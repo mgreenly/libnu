@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdint.h>
 
 /* Test utilities - include implementation directly */
 #include "test_utils.c"
@@ -27,8 +28,8 @@ compare_ints (
   const void* a,
   const void* b)
 {
-  int ia = *(const int*)a;
-  int ib = *(const int*)b;
+  int32_t ia = *(const int32_t*)a;
+  int32_t ib = *(const int32_t*)b;
   return (ia > ib) - (ia < ib);
 }
 
@@ -117,7 +118,7 @@ NU_TEST(test_strings) {
 
   nu_sort(arr, 4, sizeof(char*), compare_strings);
 
-  for (int i = 0; i < 4; i++) {
+  for (int32_t i = 0; i < 4; i++) {
     NU_ASSERT_STR_EQ(arr[i], expected[i]);
   }
   return nu_ok(NULL);
@@ -270,7 +271,7 @@ NU_TEST(test_depth_limit_protection) {
   }
   // Shuffle to create worst-case partitioning
   for (size_t i = 0; i < n - 1; i += 2) {
-    int temp = arr[i];
+    int32_t temp = arr[i];
     arr[i]     = arr[i + 1];
     arr[i + 1] = temp;
   }
@@ -302,7 +303,7 @@ NU_TEST(test_invalid_params_coverage) {
   nu_sort(arr, 0, sizeof(int), compare_ints);
 
   // Verify array unchanged (since all calls were invalid or no-ops)
-  for (int i = 0; i < 10; i++) {
+  for (int32_t i = 0; i < 10; i++) {
     NU_ASSERT_EQ(arr[i], i + 1);
   }
 

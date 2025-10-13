@@ -34,6 +34,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <float.h>
+#include <stdint.h>
 
 /* For internal library builds, use NU_MALLOC/NU_FREE macros if defined */
 /* For end users, use standard malloc/free */
@@ -59,10 +60,10 @@ typedef struct {
 // Global benchmark state
 static struct {
   nu_bench_entry_t benches[128];  // Max 128 benchmarks per file
-  int count;
+  int32_t count;
 
   // Current benchmark being run
-  int current_bench;
+  int32_t current_bench;
   size_t current_iteration;
   size_t total_iterations;
   size_t warmup_runs;
@@ -167,7 +168,7 @@ nu_bench_calculate_stats (
 
 // Run a single benchmark
 static inline void
-nu_bench_run_one (int idx)
+nu_bench_run_one (int32_t idx)
 {
   nu_bench_entry_t* bench = &nu_bench_state.benches[idx];
 
@@ -210,11 +211,11 @@ nu_bench_run_one (int idx)
 // Run all benchmarks
 static inline int
 nu_bench_run_all (
-  int argc,
+  int32_t argc,
   char** argv)
 {
   // Parse simple command line args
-  for (int i = 1; i < argc; i++) {
+  for (int32_t i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0) {
       nu_bench_state.verbose = true;
     } else if (strcmp(argv[i], "-n") == 0 && i + 1 < argc) {
@@ -243,8 +244,8 @@ nu_bench_run_all (
   }
   printf("...\n");
 
-  int run_count = 0;
-  for (int i = 0; i < nu_bench_state.count; i++) {
+  int32_t run_count = 0;
+  for (int32_t i = 0; i < nu_bench_state.count; i++) {
     // Apply filter if specified
     if (nu_bench_state.filter) {
       if (!strstr(nu_bench_state.benches[i].name, nu_bench_state.filter)) {

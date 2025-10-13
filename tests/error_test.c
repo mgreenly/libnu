@@ -1,6 +1,7 @@
 #include "../src/test.h"
 #include "../src/error.h"
 #include <limits.h>
+#include <stdint.h>
 
 // Test functions that use nu_error
 static nu_result_t
@@ -18,7 +19,7 @@ test_function_null_check (void* ptr)
 
 NU_TEST(test_result_construction) {
   // Test nu_ok creates success result
-  int value       = 42;
+  int32_t value = 42;
   nu_result_t res = nu_ok(&value);
   NU_ASSERT_TRUE(nu_is_ok(&res));
   NU_ASSERT_FALSE(nu_is_err(&res));
@@ -84,7 +85,7 @@ NU_TEST(test_error_macros) {
   NU_ASSERT_STR_EQ(res.err->message, "This function always fails");
 
   // Test NU_FAIL_IF with true condition
-  int x = 5;
+  int32_t x = 5;
   {
     nu_result_t res_local;
     if (x < 10) {
@@ -118,7 +119,7 @@ NU_TEST(test_error_propagation) {
   NU_ASSERT_STR_EQ(res.err->message, "NULL pointer parameter");
 
   // Test NU_RETURN_IF_ERR doesn't propagate success
-  int value = 42;
+  int32_t value = 42;
   res = test_function_null_check(&value);
   NU_ASSERT_TRUE(nu_is_ok(&res));
   NU_ASSERT_EQ(res.ok, &value);
@@ -134,7 +135,7 @@ NU_TEST(test_helper_functions) {
   NU_ASSERT_STR_EQ(res.err->message, "NULL pointer parameter");
 
   // Test nu_check_null accepts non-NULL
-  int value = 42;
+  int32_t value = 42;
   res = nu_check_null(&value, "test_param");
   NU_ASSERT_TRUE(nu_is_ok(&res));
   NU_ASSERT_EQ(res.ok, (void*)(uintptr_t)&value);
@@ -221,12 +222,12 @@ NU_TEST(test_real_world_usage) {
 
 NU_TEST(test_line_numbers) {
   // Test line numbers are captured correctly
-  int line_before  = __LINE__;
-  nu_error_t* err1 = NU_ERROR(NU_ERR_GENERIC, "Error 1");
-  int line1        = __LINE__ - 1; // Previous line
+  int32_t line_before = __LINE__;
+  nu_error_t* err1    = NU_ERROR(NU_ERR_GENERIC, "Error 1");
+  int32_t line1       = __LINE__ - 1; // Previous line
 
-  nu_error_t* err2 = NU_ERROR(NU_ERR_GENERIC, "Error 2");
-  int line2        = __LINE__ - 1; // Previous line
+  nu_error_t* err2    = NU_ERROR(NU_ERR_GENERIC, "Error 2");
+  int32_t line2       = __LINE__ - 1; // Previous line
 
   NU_ASSERT_EQ(err1->line, line1);
   NU_ASSERT_EQ(err2->line, line2);
@@ -234,11 +235,11 @@ NU_TEST(test_line_numbers) {
   NU_ASSERT_GT(err1->line, line_before);
 
   // Test different macro invocations get different lines
-  nu_result_t r1 = test_function_failure();
-  int line_f1    = r1.err->line;
+  nu_result_t r1     = test_function_failure();
+  int32_t line_f1    = r1.err->line;
 
-  nu_result_t r2 = test_function_null_check(NULL);
-  int line_f2    = r2.err->line;
+  nu_result_t r2     = test_function_null_check(NULL);
+  int32_t line_f2    = r2.err->line;
 
   NU_ASSERT_NE(line_f1, line_f2);
 

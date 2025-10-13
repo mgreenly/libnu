@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdint.h>
 
 // Test function signature - returns nu_result_t for consistency
 typedef nu_result_t (* nu_test_fn)(void);
@@ -45,15 +46,15 @@ typedef struct {
   const char* name;
   nu_test_fn fn;
   const char* file;
-  int line;
+  int32_t line;
 } nu_test_entry_t;
 
 // Global test state - no dynamic allocation needed
 static struct {
   nu_test_entry_t tests[512];  // Reasonable limit for single test file
-  int count;
-  int passed;
-  int failed;
+  int32_t count;
+  int32_t passed;
+  int32_t failed;
   bool verbose;
   bool stop_on_fail;
   // Static storage for test errors to avoid compound literal scope issues
@@ -66,7 +67,7 @@ nu_test_register_impl (
   const char* name,
   nu_test_fn fn,
   const char* file,
-  int line)
+  int32_t line)
 {
   if (nu_test_state.count >= 512) {
     fprintf(stderr, "ERROR: Too many tests registered (max 512)\n");
@@ -186,7 +187,7 @@ nu_test_run_all (void)
     nu_test_state.count,
     nu_test_state.count == 1 ? "" : "s");
 
-  for (int i = 0; i < nu_test_state.count; i++) {
+  for (int32_t i = 0; i < nu_test_state.count; i++) {
     nu_test_entry_t* test = &nu_test_state.tests[i];
     nu_result_t result    = test->fn();
 

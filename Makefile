@@ -92,6 +92,8 @@ $(SRCDIR)/version.h: Makefile
 	@echo "#ifndef NU_VERSION_H" > $@
 	@echo "#define NU_VERSION_H" >> $@
 	@echo "" >> $@
+	@echo "#include <stdint.h>" >> $@
+	@echo "" >> $@
 	@echo "#define NU_VERSION_MAJOR $(VERSION_MAJOR)" >> $@
 	@echo "#define NU_VERSION_MINOR $(VERSION_MINOR)" >> $@
 	@echo "#define NU_VERSION_PATCH $(VERSION_PATCH)" >> $@
@@ -112,19 +114,19 @@ $(SRCDIR)/version.h: Makefile
 	@echo " * @brief Get the major version number" >> $@
 	@echo " * @return Major version number" >> $@
 	@echo " */" >> $@
-	@echo "int nu_version_major(void);" >> $@
+	@echo "uint32_t nu_version_major(void);" >> $@
 	@echo "" >> $@
 	@echo "/**" >> $@
 	@echo " * @brief Get the minor version number" >> $@
 	@echo " * @return Minor version number" >> $@
 	@echo " */" >> $@
-	@echo "int nu_version_minor(void);" >> $@
+	@echo "uint32_t nu_version_minor(void);" >> $@
 	@echo "" >> $@
 	@echo "/**" >> $@
 	@echo " * @brief Get the patch version number" >> $@
 	@echo " * @return Patch version number" >> $@
 	@echo " */" >> $@
-	@echo "int nu_version_patch(void);" >> $@
+	@echo "uint32_t nu_version_patch(void);" >> $@
 	@echo "" >> $@
 	@echo "#endif" >> $@
 

@@ -163,7 +163,7 @@ introsort_impl (
   } frame_t;
 
   frame_t stack[NU_QUICKSORT_STACK_SIZE];
-  int top = 0;
+  int32_t top = 0;
 
   stack[top++] = (frame_t){low, high, 0};
 
@@ -181,9 +181,9 @@ introsort_impl (
     } else if (frame.depth >= depth_limit) {
       heapsort(base, frame.low, frame.high, size, compar);
     } else {
-      size_t pivot       = partition(base, frame.low, frame.high, size, compar);
+      size_t pivot           = partition(base, frame.low, frame.high, size, compar);
 
-      int frames_to_push = 0;
+      int32_t frames_to_push = 0;
       if (pivot > frame.low)
         frames_to_push++;
       if (pivot < frame.high)

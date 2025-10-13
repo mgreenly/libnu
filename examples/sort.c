@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <nu/sort.h>
 
 /*
@@ -20,7 +21,7 @@
 typedef struct {
   char first_name[32];
   char last_name[32];
-  int age;
+  int32_t age;
   float salary;
 } Person;
 
@@ -63,7 +64,7 @@ compare_by_full_name (const void* a, const void* b)
   const Person* p2 = (const Person*)b;
 
   // First compare last names
-  int last_cmp     = strcmp(p1->last_name, p2->last_name);
+  int32_t last_cmp = strcmp(p1->last_name, p2->last_name);
   if (last_cmp != 0) {
     return last_cmp;
   }
@@ -80,8 +81,8 @@ compare_by_age_group_and_name (const void* a, const void* b)
   const Person* p2 = (const Person*)b;
 
   // Define age groups: <30, 30-50, >50
-  int group1       = (p1->age < 30) ? 0 : (p1->age <= 50) ? 1 : 2;
-  int group2       = (p2->age < 30) ? 0 : (p2->age <= 50) ? 1 : 2;
+  int32_t group1 = (p1->age < 30) ? 0 : (p1->age <= 50) ? 1 : 2;
+  int32_t group2 = (p2->age < 30) ? 0 : (p2->age <= 50) ? 1 : 2;
 
   // First sort by age group
   if (group1 != group2) {

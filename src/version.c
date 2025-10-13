@@ -1,4 +1,5 @@
 #include "version.h"
+#include <stdint.h>
 
 const char*
 nu_version (void)
@@ -6,19 +7,19 @@ nu_version (void)
   return NU_VERSION_STRING;
 }
 
-int
+uint32_t
 nu_version_major (void)
 {
   return NU_VERSION_MAJOR;
 }
 
-int
+uint32_t
 nu_version_minor (void)
 {
   return NU_VERSION_MINOR;
 }
 
-int
+uint32_t
 nu_version_patch (void)
 {
   return NU_VERSION_PATCH;

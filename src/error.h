@@ -28,7 +28,7 @@ typedef struct nu_error {
   nu_error_code_t code;
   const char* message;           // Static string preferred
   const char* file;
-  int line;
+  int32_t line;
   struct nu_error* cause;        // Chain to previous error (owned)
 } nu_error_t;
 
@@ -149,9 +149,9 @@ nu_error_fprintf (
   }
 
   const nu_error_t* e = err;
-  int depth           = 0;
+  int32_t depth       = 0;
   while (e) {
-    for (int i = 0; i < depth; i++)fprintf(f, "  ");
+    for (int32_t i = 0; i < depth; i++)fprintf(f, "  ");
     fprintf(f, "→ %s", nu_error_message(e));
     if (e->file) {
       fprintf(f, " [%s:%d]", e->file, e->line);

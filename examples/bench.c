@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include <nu/bench.h>
 
@@ -39,7 +40,7 @@ NU_BENCH(string_concat_simple) {
 
   // Operation to benchmark: concatenate strings
   buffer[0] = '\0';
-  for (int i = 0; parts[i] != NULL; i++) {
+  for (int32_t i = 0; parts[i] != NULL; i++) {
     strcat(buffer, parts[i]);
   }
 
@@ -84,23 +85,23 @@ NU_BENCH(array_sum_1000) {
  */
 
 // Helper: Linear search
-static int
-linear_search (const int* arr, size_t n, int target)
+static int32_t
+linear_search (const int* arr, size_t n, int32_t target)
 {
   for (size_t i = 0; i < n; i++) {
-    if (arr[i] == target)return (int)i;
+    if (arr[i] == target)return (int32_t)i;
   }
   return -1;
 }
 
 // Helper: Binary search (requires sorted array)
-static int
-binary_search (const int* arr, size_t n, int target)
+static int32_t
+binary_search (const int* arr, size_t n, int32_t target)
 {
   size_t left = 0, right = n;
   while (left < right) {
     size_t mid = left + (right - left) / 2;
-    if (arr[mid] == target)return (int)mid;
+    if (arr[mid] == target)return (int32_t)mid;
     if (arr[mid] < target)left = mid + 1;
     else right = mid;
   }
@@ -118,9 +119,9 @@ NU_BENCH(search_linear_10k) {
   NU_BENCH_START();
 
   // Search for 10 different values
-  for (int i = 0; i < 10; i++) {
-    int target = (rand() % (int)n) * 2;
-    int result = linear_search(arr, n, target);
+  for (int32_t i = 0; i < 10; i++) {
+    int32_t target = (rand() % (int32_t)n) * 2;
+    int32_t result = linear_search(arr, n, target);
     (void)result;      // Prevent optimization
   }
 
@@ -139,9 +140,9 @@ NU_BENCH(search_binary_10k) {
   NU_BENCH_START();
 
   // Search for same 10 values
-  for (int i = 0; i < 10; i++) {
-    int target = (rand() % (int)n) * 2;
-    int result = binary_search(arr, n, target);
+  for (int32_t i = 0; i < 10; i++) {
+    int32_t target = (rand() % (int32_t)n) * 2;
+    int32_t result = binary_search(arr, n, target);
     (void)result;      // Prevent optimization
   }
 
@@ -166,7 +167,7 @@ NU_BENCH(bubble_sort_100) {
   for (size_t i = 0; i < n-1; i++) {
     for (size_t j = 0; j < n-i-1; j++) {
       if (arr[j] > arr[j+1]) {
-        int temp = arr[j];
+        int32_t temp = arr[j];
         arr[j]   = arr[j+1];
         arr[j+1] = temp;
       }
@@ -188,7 +189,7 @@ NU_BENCH(bubble_sort_500) {
   for (size_t i = 0; i < n-1; i++) {
     for (size_t j = 0; j < n-i-1; j++) {
       if (arr[j] > arr[j+1]) {
-        int temp = arr[j];
+        int32_t temp = arr[j];
         arr[j]   = arr[j+1];
         arr[j+1] = temp;
       }
@@ -220,8 +221,8 @@ NU_BENCH(string_length_micro) {
 
   // Run strlen many times for measurable timing
   size_t total = 0;
-  for (int iter = 0; iter < 10000; iter++) {
-    for (int i = 0; test_strings[i]; i++) {
+  for (int32_t iter = 0; iter < 10000; iter++) {
+    for (int32_t i = 0; test_strings[i]; i++) {
       total += strlen(test_strings[i]);
     }
   }
